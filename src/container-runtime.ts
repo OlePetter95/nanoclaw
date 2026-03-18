@@ -31,13 +31,19 @@ function detectProxyBindHost(): string {
   // Detect Docker Desktop by checking for its socket proxy path.
   if (fs.existsSync('/proc/sys/fs/binfmt_misc/WSLInterop')) {
     try {
-      const ctx = execSync('docker context inspect --format {{.Endpoints.docker.Host}}', {
-        stdio: ['pipe', 'pipe', 'pipe'],
-        encoding: 'utf-8',
-        timeout: 5000,
-      }).trim();
-      if (ctx.includes('desktop') || ctx.includes('Desktop')) return '127.0.0.1';
-    } catch { /* fall through to bridge detection */ }
+      const ctx = execSync(
+        'docker context inspect --format {{.Endpoints.docker.Host}}',
+        {
+          stdio: ['pipe', 'pipe', 'pipe'],
+          encoding: 'utf-8',
+          timeout: 5000,
+        },
+      ).trim();
+      if (ctx.includes('desktop') || ctx.includes('Desktop'))
+        return '127.0.0.1';
+    } catch {
+      /* fall through to bridge detection */
+    }
   }
 
   // Bare-metal Linux: bind to the docker0 bridge IP instead of 0.0.0.0
